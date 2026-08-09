@@ -184,7 +184,7 @@ function buildPrompt(items, affiliateLinkTags) {
     .map((it, i) => `${i + 1}. ${it.title}\n   URL: ${it.link}\n   Summary: ${it.description || "(none)"}`)
     .join("\n\n");
 
-  return `You are writing for affiliate_shiwal, an independent blog that covers HighLevel CRM
+  return `You are writing for affiliatealfa, an independent blog that covers HighLevel CRM
 updates for marketing agencies. The tone is direct, specific, and useful, never hypey
 marketing copy. You write in your own words; you never copy phrasing from the source.
 

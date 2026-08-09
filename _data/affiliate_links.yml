@@ -3,41 +3,41 @@
 # "default" is the fallback when no other tag fits well.
 
 default:
-  url: "https://www.gohighlevel.com/?fp_ref=shiwal"
+  url: "https://www.gohighlevel.com/?fp_ref=affiliatealfa"
   label: "Try HighLevel"
   use_when: "General posts, brand overview, no specific angle"
 
 annual:
-  url: "https://gohighlevel.com/annual?fp_ref=shiwal"
+  url: "https://gohighlevel.com/annual?fp_ref=affiliatealfa"
   label: "See Annual Plans"
   use_when: "Posts about pricing, plan comparisons, or committing long-term"
 
 saas_pro:
-  url: "https://www.gohighlevel.com/protrial?fp_ref=shiwal"
+  url: "https://www.gohighlevel.com/protrial?fp_ref=affiliatealfa"
   label: "Start SaaS Pro Trial"
   use_when: "Posts about white-labeling, reselling HighLevel, agency SaaS mode"
 
 bootcamp:
-  url: "https://www.gohighlevel.com/highlevel-bootcamp?fp_ref=shiwal"
+  url: "https://www.gohighlevel.com/highlevel-bootcamp?fp_ref=affiliatealfa"
   label: "Join the 30-Day Bootcamp"
   use_when: "Beginner or getting-started posts"
 
 ai:
-  url: "https://www.gohighlevel.com/ai?fp_ref=shiwal"
+  url: "https://www.gohighlevel.com/ai?fp_ref=affiliatealfa"
   label: "Explore HighLevel AI"
   use_when: "Posts about AI features, Voice AI, workflow AI, automation intelligence"
 
 pricing:
-  url: "https://www.gohighlevel.com/pricing?fp_ref=shiwal"
+  url: "https://www.gohighlevel.com/pricing?fp_ref=affiliatealfa"
   label: "Compare All Plans"
   use_when: "Posts explicitly comparing Starter vs Unlimited vs SaaS Pro pricing"
 
 upgrade:
-  url: "https://app.gohighlevel.com/offers/affiliate-upgrade?fp_ref=shiwal"
+  url: "https://app.gohighlevel.com/offers/affiliate-upgrade?fp_ref=affiliatealfa"
   label: "Upgrade Your Account"
   use_when: "Posts aimed at existing HighLevel users considering an upgrade"
 
 voice_ai_workshop:
-  url: "https://www.gohighlevel.com/voice-ai-sales-workshop?fp_ref=shiwal"
+  url: "https://www.gohighlevel.com/voice-ai-sales-workshop?fp_ref=affiliatealfa"
   label: "Join the Voice AI Workshop"
   use_when: "Posts specifically about the Voice AI Sales System"
