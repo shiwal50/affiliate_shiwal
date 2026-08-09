@@ -58,6 +58,19 @@ document.addEventListener("DOMContentLoaded", function () {
       status.textContent = "";
       status.className = "form-status";
 
+      var messageField = form.querySelector('input[name="message"]');
+      if (messageField) {
+        var nameVal = form.querySelector('[name="name"]').value;
+        var emailVal = form.querySelector('[name="email"]').value;
+        var agencyIdVal = form.querySelector('[name="agency_id"]') ? form.querySelector('[name="agency_id"]').value : "";
+        var agencyEmailVal = form.querySelector('[name="agency_email"]') ? form.querySelector('[name="agency_email"]').value : "";
+        messageField.value =
+          "Name: " + nameVal + "\n" +
+          "Email: " + emailVal + "\n" +
+          "Agency ID: " + (agencyIdVal || "-") + "\n" +
+          "Agency Email: " + (agencyEmailVal || "-");
+      }
+
       var formData = new FormData(form);
       var payload = Object.fromEntries(formData.entries());
 
@@ -74,11 +87,11 @@ document.addEventListener("DOMContentLoaded", function () {
           status.className = "form-status success";
           form.reset();
         } else {
-          status.textContent = (result && result.message) ? result.message : "Something went wrong. Please try again or email singhshiwal@gmail.com directly.";
+          status.textContent = (result && result.message) ? result.message : "Something went wrong. Please try again or email affiliateshiwal@gmail.com directly.";
           status.className = "form-status error";
         }
       } catch (err) {
-        status.textContent = "Couldn't reach the form service. Please try again or email singhshiwal@gmail.com directly.";
+        status.textContent = "Couldn't reach the form service. Please try again or email affiliateshiwal@gmail.com directly.";
         status.className = "form-status error";
       } finally {
         submitBtn.disabled = false;

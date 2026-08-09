@@ -8,6 +8,11 @@ url: "https://shiwal50.github.io"
 markdown: kramdown
 permalink: /posts/:year/:month/:day/:title/
 
+# Jekyll hides posts dated later than the build server's own clock by default.
+# Since posts are dated when written (not necessarily when the build runs),
+# this makes sure a post is never silently hidden by a clock mismatch.
+future: true
+
 collections:
   posts:
     output: true
