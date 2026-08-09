@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+  <meta name="description" content="{{ page.excerpt | default: site.description | strip_html | truncate: 160 }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a href="{{ '/' | relative_url }}" class="brand"><span class="dot"></span>affiliate_shiwal</a>
+      <nav class="site-nav">
+        <a href="{{ '/' | relative_url }}">Posts</a>
+        <a href="https://www.gohighlevel.com/?fp_ref=shiwal" target="_blank" rel="noopener sponsored">Try HighLevel</a>
+        <button type="button" class="btn btn-primary" data-open-modal>Get the Agency Playbook</button>
+      </nav>
+    </div>
+  </header>
+
+  {{ content }}
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>&copy; {{ 'now' | date: '%Y' }} affiliate_shiwal. Independent HighLevel coverage, run by one person, not HighLevel Inc.</p>
+      <p>Some links on this site are affiliate links, disclosed on every post that uses one.</p>
+      <p><a href="mailto:singhshiwal@gmail.com">singhshiwal@gmail.com</a></p>
+    </div>
+  </footer>
+
+  {% include lead-modal.html %}
+
+  <script src="{{ '/assets/js/lead-form.js' | relative_url }}"></script>
+</body>
+</html>

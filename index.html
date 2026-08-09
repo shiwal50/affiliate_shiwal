@@ -1,0 +1,93 @@
+---
+layout: default
+title: Home
+---
+<section class="hero">
+  <div class="wrap">
+    <p class="hero-eyebrow">Independent HighLevel coverage · updated daily</p>
+    <h1>What's actually changing inside HighLevel, explained for agencies.</h1>
+    <p>
+      Write-ups on new HighLevel features, changelog updates, and workflow ideas, pulled straight
+      from HighLevel's own release notes and turned into something you can actually use to decide
+      what's worth switching to or upgrading for.
+    </p>
+    <div class="hero-actions">
+      <button type="button" class="btn btn-primary" data-open-modal>Get the Agency Playbook</button>
+      <a class="btn btn-ghost-light" href="#latest">Read the Latest</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="num">8</span>
+        <span class="label">Official referral links tracked</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">Daily</span>
+        <span class="label">Changelog review cadence</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num">1</span>
+        <span class="label">Person writing every post</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <p class="section-heading">What this covers</p>
+    <h2>Every HighLevel release, decoded for the way agencies actually use it.</h2>
+    <p class="section-intro">Not a mirror of the changelog. Each post exists to answer one question: does this change anything for how you run your agency?</p>
+    <div class="coverage-grid">
+      <div class="coverage-card">
+        <span class="icon-dot"></span>
+        <h3>New features</h3>
+        <p>What shipped, what it replaces, and whether it's worth turning on this week.</p>
+      </div>
+      <div class="coverage-card">
+        <span class="icon-dot"></span>
+        <h3>AI tools</h3>
+        <p>Voice AI, Conversation AI, AI Studio — plain-English breakdowns of what's actually new.</p>
+      </div>
+      <div class="coverage-card">
+        <span class="icon-dot"></span>
+        <h3>Pricing & plans</h3>
+        <p>Starter vs Unlimited vs SaaS Pro, and when upgrading actually pays for itself.</p>
+      </div>
+      <div class="coverage-card">
+        <span class="icon-dot"></span>
+        <h3>Agency playbooks</h3>
+        <p>How other agencies are actually using each new release, not just what it does on paper.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section feed" id="latest">
+  <div class="wrap">
+    <p class="section-heading">Latest posts</p>
+    <h2>Fresh from the changelog</h2>
+    <div class="pipeline">
+      {% for post in site.posts limit:20 %}
+      <div class="post-card">
+        <p class="post-meta">{{ post.date | date: "%b %d, %Y" }}</p>
+        <h2><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
+        <p>{{ post.excerpt | strip_html | truncate: 140 }}</p>
+      </div>
+      {% else %}
+      <div class="post-card">
+        <p class="post-meta">Coming soon</p>
+        <h2>The first post is on its way</h2>
+        <p>Daily coverage of HighLevel updates starts here. Check back soon.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section lead-section" id="get-started">
+  <div class="wrap">
+    <h2>Running an agency? Let's talk HighLevel.</h2>
+    <p>Leave your details and I'll follow up with a setup walkthrough tailored to your agency, no spam, no auto-drip sequence.</p>
+    {% include lead-form-fields.html id="inline-lead-form" %}
+  </div>
+</section>

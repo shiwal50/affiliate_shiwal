@@ -1,0 +1,31 @@
+title: affiliate_shiwal
+description: >-
+  Independent coverage of HighLevel CRM updates, features, and workflows
+  for agencies deciding whether to switch.
+baseurl: "/affiliate_shiwal"
+url: "https://shiwal50.github.io"
+
+markdown: kramdown
+permalink: /posts/:year/:month/:day/:title/
+
+collections:
+  posts:
+    output: true
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+exclude:
+  - scripts
+  - README.md
+  - node_modules
+  - package.json
+  - package-lock.json

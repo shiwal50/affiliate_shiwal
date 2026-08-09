@@ -1,0 +1,27 @@
+{% assign form_id = include.id | default: "lead-form" %}
+<form class="lead-form" id="{{ form_id }}" data-web3forms-key="YOUR_WEB3FORMS_ACCESS_KEY">
+  <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY">
+  <input type="hidden" name="subject" value="New lead from affiliate_shiwal">
+  <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
+
+  <div class="field">
+    <label for="{{ form_id }}-name">Name</label>
+    <input type="text" id="{{ form_id }}-name" name="name" required>
+  </div>
+  <div class="field">
+    <label for="{{ form_id }}-email">Email</label>
+    <input type="email" id="{{ form_id }}-email" name="email" required>
+  </div>
+  <div class="field">
+    <label for="{{ form_id }}-agency_id">Agency ID</label>
+    <input type="text" id="{{ form_id }}-agency_id" name="agency_id">
+  </div>
+  <div class="field">
+    <label for="{{ form_id }}-agency_email">Agency Email</label>
+    <input type="email" id="{{ form_id }}-agency_email" name="agency_email">
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-block">Send Details</button>
+  <p class="form-note">Submissions are emailed directly to me via Web3Forms. Your details aren't stored anywhere else.</p>
+  <p class="form-status" data-status></p>
+</form>
