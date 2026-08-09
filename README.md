@@ -1,4 +1,4 @@
-# affiliate_shiwal
+# AffiliateAlfa
 
 Daily HighLevel CRM coverage site. Static Jekyll site on GitHub Pages, with a
 GitHub Action that drafts a new post every day from HighLevel's own blog/changelog
