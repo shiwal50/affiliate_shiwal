@@ -6,10 +6,6 @@ layout: default
     <p class="post-meta">{{ page.date | date: "%b %d, %Y" }}{% if page.source_url %} · source: <a href="{{ page.source_url }}" target="_blank" rel="noopener">HighLevel</a>{% endif %}</p>
     <h1>{{ page.title }}</h1>
 
-    <p class="disclosure">
-      Disclosure: this post contains affiliate links. If you sign up through them, I may earn a commission at no extra cost to you.
-    </p>
-
     {% if page.image %}
       <img class="post-hero-image" src="{{ page.image | relative_url }}" alt="{{ page.image_alt | default: page.title }}">
     {% endif %}
@@ -18,10 +14,18 @@ layout: default
 
     {% assign link_key = page.affiliate_link | default: "default" %}
     {% assign link = site.data.affiliate_links[link_key] %}
+    {% assign upgrade_link = site.data.affiliate_links["upgrade"] %}
     <div class="cta-block">
       <p>{{ page.cta_text | default: "Want to see if this fits your agency?" }}</p>
       <a class="btn btn-primary" href="{{ link.url }}" target="_blank" rel="noopener sponsored">{{ link.label }}</a>
+      <p style="margin-top: 14px; margin-bottom: 0;">
+        <a href="{{ upgrade_link.url }}" target="_blank" rel="noopener sponsored" style="color: #C9D2FF;">Already on HighLevel? Upgrade your account &rarr;</a>
+      </p>
     </div>
+
+    <p class="disclosure">
+      Disclosure: this post contains affiliate links. If you sign up or upgrade through them, I may earn a commission at no extra cost to you. Full details on the <a href="{{ '/affiliate-disclosure/' | relative_url }}">disclosure page</a>.
+    </p>
 
     <p><a href="{{ '/' | relative_url }}">&larr; Back to all posts</a></p>
   </div>

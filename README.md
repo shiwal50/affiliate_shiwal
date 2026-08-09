@@ -17,7 +17,7 @@ Request that you review and merge yourself.
 
 3. **Add repository secrets** (Settings → Secrets and variables → Actions → New repository secret)
    - `GEMINI_API_KEY` — the same key you use in Loopback's `lib/ai.js`.
-   - `UNSPLASH_ACCESS_KEY` — free from https://unsplash.com/developers (create an app, use the Access Key). Optional: without it, posts publish without a cover image.
+   - `UNSPLASH_ACCESS_KEY` — free from https://unsplash.com/developers (create an app, use the Access Key). Used only as a fallback: the script first tries to use a real image from HighLevel's own post/changelog (embedded image or og:image), and only reaches Unsplash if no real image is found. Without this key, it skips straight to a simple generated graphic instead.
 
 4. **Set your Web3Forms access key**
    - Sign up free at https://web3forms.com, create a form, copy the Access Key.

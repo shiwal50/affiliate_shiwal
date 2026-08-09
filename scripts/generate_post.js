@@ -6,7 +6,8 @@
  * 2. Filters out items already used (tracked in scripts/used_sources.json).
  * 3. Asks Gemini to pick the most blog-worthy item, an angle, and write the post.
  * 4. Picks the best-fit affiliate link tag from _data/affiliate_links.yml.
- * 5. Fetches a licensed cover image from Unsplash.
+ * 5. Sources a cover image: real image from HighLevel's own post/changelog first,
+ *    then a licensed Unsplash photo, then a simple generated graphic as last resort.
  * 6. Writes a new file into _posts/, ready to be opened as a PR by the workflow.
  *
  * Required env vars (set as GitHub Actions secrets):
@@ -62,14 +63,56 @@ async function main() {
     return;
   }
 
-  const imagePath = UNSPLASH_ACCESS_KEY
-    ? await fetchAndSaveImage(draft.image_query, draft.slug)
-    : null;
+  const imagePath = await sourceImage(draft, freshItems);
 
   writePostFile(draft, imagePath);
   markSourceUsed(draft.source_url, usedUrls);
 
   console.log(`Draft created: ${draft.slug}`);
+}
+
+/**
+ * Image priority order:
+ *   1. A real image already embedded in the source RSS item (HighLevel's own
+ *      featured image / content image) - most credible, actually from HighLevel.
+ *   2. The og:image / twitter:image meta tag on the source article's own page,
+ *      fetched directly - also a real HighLevel-provided image.
+ *   3. A licensed Unsplash photo matching the topic, only if neither real
+ *      image was found and UNSPLASH_ACCESS_KEY is set.
+ *   4. A simple generated graphic (no network dependency) as a last resort,
+ *      so a post is never left with a broken or missing image.
+ */
+async function sourceImage(draft, freshItems) {
+  const sourceItem = freshItems.find((it) => it.link === draft.source_url);
+
+  const embedded = sourceItem ? extractImageFromItem(sourceItem) : null;
+  if (embedded) {
+    const saved = await downloadImage(embedded, draft.slug);
+    if (saved) {
+      console.log("Using real image embedded in the source item.");
+      return saved;
+    }
+  }
+
+  const ogImage = await extractOgImage(draft.source_url);
+  if (ogImage) {
+    const saved = await downloadImage(ogImage, draft.slug);
+    if (saved) {
+      console.log("Using real og:image from the source article.");
+      return saved;
+    }
+  }
+
+  if (UNSPLASH_ACCESS_KEY) {
+    const unsplash = await fetchAndSaveImage(draft.image_query, draft.slug);
+    if (unsplash) {
+      console.log("No real HighLevel image found, using a licensed Unsplash photo.");
+      return unsplash;
+    }
+  }
+
+  console.log("No real image or Unsplash key available, generating a simple graphic instead.");
+  return generateFallbackImage(draft.title, draft.slug);
 }
 
 // ---------- Feed fetching ----------
@@ -97,8 +140,12 @@ function parseRssItems(xml) {
     const link = extractTag(raw, "link");
     const pubDate = extractTag(raw, "pubDate");
     const description = extractTag(raw, "description");
+    // content:encoded often carries the full post body with the real
+    // featured image inline, even when description is a short summary.
+    const contentEncodedMatch = raw.match(/<content:encoded>([\s\S]*?)<\/content:encoded>/);
+    const contentEncoded = contentEncodedMatch ? contentEncodedMatch[1] : null;
     if (title && link) {
-      items.push({ title, link, pubDate, description });
+      items.push({ title, link, pubDate, description, contentEncoded });
     }
   }
   return items;
@@ -238,17 +285,107 @@ async function fetchAndSaveImage(query, slug) {
     const data = await res.json();
     const imageUrl = data?.urls?.regular;
     if (!imageUrl) return null;
+    return await downloadImage(imageUrl, slug);
+  } catch (err) {
+    console.warn("Unsplash fetch failed:", err.message);
+    return null;
+  }
+}
 
+// ---------- Real image extraction (HighLevel's own images, preferred) ----------
+
+// Looks for the first <img src="..."> inside the RSS item's own content,
+// which for HighLevel's blog/changelog is usually the actual featured image
+// HighLevel itself published with the post.
+function extractImageFromItem(item) {
+  const haystacks = [item.contentEncoded, item.description].filter(Boolean);
+  for (const html of haystacks) {
+    const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (match && match[1] && looksLikeRealImageUrl(match[1])) {
+      return match[1];
+    }
+  }
+  return null;
+}
+
+// Fetches the source article's own page and reads its og:image / twitter:image
+// meta tag - this is the image HighLevel itself chose to represent that post.
+async function extractOgImage(pageUrl) {
+  try {
+    const res = await fetch(pageUrl);
+    if (!res.ok) return null;
+    const html = await res.text();
+    const og = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+    if (og && og[1] && looksLikeRealImageUrl(og[1])) return og[1];
+
+    const twitter = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
+    if (twitter && twitter[1] && looksLikeRealImageUrl(twitter[1])) return twitter[1];
+
+    return null;
+  } catch (err) {
+    console.warn("og:image fetch failed:", err.message);
+    return null;
+  }
+}
+
+// Filters out obvious tracking pixels, spacer gifs, and tiny icons so we
+// don't end up "sourcing" a 1x1 transparent gif as the post's hero image.
+function looksLikeRealImageUrl(url) {
+  const lower = url.toLowerCase();
+  if (lower.includes("pixel") || lower.includes("spacer") || lower.includes("tracking")) return false;
+  if (lower.endsWith(".gif")) return false;
+  return /\.(jpe?g|png|webp)(\?|$)/.test(lower) || lower.includes("cdn") || lower.includes("image");
+}
+
+// Generic downloader used by both the real-image path and the Unsplash path.
+async function downloadImage(imageUrl, slug) {
+  try {
     const imgRes = await fetch(imageUrl);
+    if (!imgRes.ok) return null;
     const buffer = Buffer.from(await imgRes.arrayBuffer());
-    const filename = `${slug}.jpg`;
+    const contentType = imgRes.headers.get("content-type") || "";
+    const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
+    const filename = `${slug}.${ext}`;
     const outPath = path.join(ROOT, "assets", "images", filename);
     fs.writeFileSync(outPath, buffer);
     return `/assets/images/${filename}`;
   } catch (err) {
-    console.warn("Image fetch failed:", err.message);
+    console.warn("Image download failed:", err.message);
     return null;
   }
+}
+
+// ---------- Last-resort fallback: a simple generated graphic, no network needed ----------
+// Only used when no real HighLevel image and no Unsplash key/result are available,
+// so a post is never left with a missing or broken image.
+function generateFallbackImage(title, slug) {
+  const escapedTitle = title.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const svg = `<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A0F2C"/>
+      <stop offset="100%" stop-color="#12183F"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2E5BFF"/>
+      <stop offset="100%" stop-color="#8B3EFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="80" y="80" width="64" height="6" rx="3" fill="url(#accent)"/>
+  <foreignObject x="80" y="120" width="1040" height="400">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Arial, sans-serif; color: #FFFFFF; font-size: 44px; font-weight: 700; line-height: 1.25;">
+      ${escapedTitle}
+    </div>
+  </foreignObject>
+  <text x="80" y="560" font-family="Arial, sans-serif" font-size="20" fill="#9FB0FF" letter-spacing="2">AFFILIATEALFA · HIGHLEVEL COVERAGE</text>
+</svg>`;
+
+  const filename = `${slug}.svg`;
+  const outPath = path.join(ROOT, "assets", "images", filename);
+  fs.writeFileSync(outPath, svg);
+  return `/assets/images/${filename}`;
 }
 
 // ---------- Write the post file ----------
