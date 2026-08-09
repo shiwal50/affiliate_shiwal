@@ -187,6 +187,101 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .site-footer a { color: #B8C0E8; }
 
 /* ---------- Responsive ---------- */
+/* ---------- Affiliate disclosure banner ---------- */
+.disclosure-banner {
+  background: #0E1338;
+  color: #B8C0E8;
+  font-size: 13.5px;
+  text-align: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--line-on-navy);
+}
+.disclosure-banner a { color: #C9D2FF; }
+
+/* ---------- Pricing table ---------- */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+.price-card {
+  background: var(--navy-raised);
+  border: 1px solid var(--line-on-navy);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+}
+.price-card.featured { border: 2px solid; border-image: var(--gradient) 1; position: relative; }
+.price-card .badge {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  background: var(--gradient); color: var(--white); font-size: 11.5px; font-weight: 700;
+  letter-spacing: 0.06em; padding: 5px 14px; border-radius: 999px; text-transform: uppercase;
+}
+.price-card .plan-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin-bottom: 4px; }
+.price-card .plan-for { color: #9099BE; font-size: 13.5px; margin-bottom: 18px; }
+.price-card .plan-price { font-family: var(--font-display); font-size: 38px; font-weight: 800; margin-bottom: 2px; }
+.price-card .plan-price span { font-size: 14px; font-weight: 500; color: #9099BE; }
+.price-card .plan-note { font-size: 12.5px; color: #7B84AE; margin-bottom: 22px; }
+.price-card ul { list-style: none; padding: 0; margin: 0 0 26px; flex-grow: 1; }
+.price-card li { font-size: 14.5px; padding: 7px 0; color: #C4CAE6; border-top: 1px solid var(--line-on-navy); }
+.price-card li:first-child { border-top: none; }
+.price-card .btn { margin-top: auto; }
+
+/* ---------- Feature-value table ---------- */
+.value-table { background: var(--navy-raised); border: 1px solid var(--line-on-navy); border-radius: var(--radius-lg); overflow: hidden; }
+.value-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line-on-navy);
+  color: var(--white);
+}
+.value-row:last-child { border-bottom: none; }
+.value-row .feature-name { font-weight: 600; font-size: 14.5px; }
+.value-row .feature-desc { color: #9099BE; font-size: 13px; margin-top: 2px; }
+.value-row .check {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--gradient);
+  display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 13px; flex-shrink: 0;
+}
+.value-table-total {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; background: rgba(46,91,255,0.08);
+}
+.value-table-total .label { font-size: 13px; color: #9099BE; text-transform: uppercase; letter-spacing: 0.05em; }
+.value-table-total .price { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: var(--white); }
+.value-table-total .price span { font-size: 14px; color: #9099BE; font-weight: 500; }
+
+/* ---------- Bootcamp section ---------- */
+.bootcamp-card {
+  background: var(--gradient);
+  border-radius: var(--radius-lg);
+  padding: 44px;
+  color: var(--white);
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+.bootcamp-card .free-tag {
+  display: inline-block; background: rgba(255,255,255,0.2); font-size: 12.5px; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
+}
+.bootcamp-card h2 { color: var(--white); font-size: 26px; margin-bottom: 12px; }
+.bootcamp-card p { color: rgba(255,255,255,0.9); }
+.bootcamp-card ul { list-style: none; padding: 0; margin: 0 0 24px; }
+.bootcamp-card li { padding: 6px 0 6px 26px; position: relative; font-size: 14.5px; }
+.bootcamp-card li::before { content: "✓"; position: absolute; left: 0; font-weight: 700; }
+.bootcamp-card .btn-secondary { color: var(--ink); }
+
+@media (max-width: 800px) {
+  .bootcamp-card { grid-template-columns: 1fr; padding: 30px; }
+}
+
 @media (max-width: 640px) {
   .site-nav { gap: 12px; }
   .site-nav a:not(.btn) { display: none; }
@@ -195,4 +290,5 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .hero-stat .num { font-size: 20px; }
   .section { padding: 52px 0; }
   .modal-card { padding: 26px; }
+  .value-row { grid-template-columns: 1fr auto; padding: 14px 18px; }
 }
