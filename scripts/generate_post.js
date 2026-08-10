@@ -29,11 +29,11 @@ const AFFILIATE_LINKS_PATH = path.join(ROOT, "_data", "affiliate_links.yml");
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
 
-// HighLevel's own feeds. Add/remove as you confirm which ones are live.
-const FEEDS = [
-  "https://www.gohighlevel.com/blog/rss.xml",
-  "https://ideas.gohighlevel.com/feed", // may not exist; script skips failures
-];
+// HighLevel's own changelog feed. Verified working directly (fetched and
+// confirmed valid RSS, real dated entries, real embedded screenshots) rather
+// than guessed - this is the actual <link rel="self"> feed HighLevel's own
+// changelog page links to.
+const FEEDS = ["https://ideas.gohighlevel.com/api/changelog/feed.rss"];
 
 async function main() {
   if (!GEMINI_API_KEY) {
@@ -139,13 +139,14 @@ function parseRssItems(xml) {
     const title = extractTag(raw, "title");
     const link = extractTag(raw, "link");
     const pubDate = extractTag(raw, "pubDate");
-    const description = extractTag(raw, "description");
+    const description = extractTag(raw, "description"); // plain text, for Gemini's prompt
+    const rawDescription = extractRawTag(raw, "description"); // HTML intact, for image extraction
     // content:encoded often carries the full post body with the real
     // featured image inline, even when description is a short summary.
     const contentEncodedMatch = raw.match(/<content:encoded>([\s\S]*?)<\/content:encoded>/);
     const contentEncoded = contentEncodedMatch ? contentEncodedMatch[1] : null;
     if (title && link) {
-      items.push({ title, link, pubDate, description, contentEncoded });
+      items.push({ title, link, pubDate, description, rawDescription, contentEncoded });
     }
   }
   return items;
@@ -158,6 +159,15 @@ function extractTag(xml, tag) {
     .replace(/<!\[CDATA\[(.*?)\]\]>/gs, "$1")
     .replace(/<[^>]+>/g, "")
     .trim();
+}
+
+// Same as extractTag, but keeps HTML tags intact (only unwraps CDATA).
+// Used where we need to find things like <img src="..."> inside the field,
+// which extractTag's tag-stripping would otherwise destroy.
+function extractRawTag(xml, tag) {
+  const match = xml.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`));
+  if (!match) return null;
+  return match[1].replace(/<!\[CDATA\[(.*?)\]\]>/gs, "$1").trim();
 }
 
 // ---------- Used-source tracking ----------
@@ -298,7 +308,7 @@ async function fetchAndSaveImage(query, slug) {
 // which for HighLevel's blog/changelog is usually the actual featured image
 // HighLevel itself published with the post.
 function extractImageFromItem(item) {
-  const haystacks = [item.contentEncoded, item.description].filter(Boolean);
+  const haystacks = [item.contentEncoded, item.rawDescription].filter(Boolean);
   for (const html of haystacks) {
     const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
     if (match && match[1] && looksLikeRealImageUrl(match[1])) {
