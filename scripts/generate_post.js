@@ -55,13 +55,15 @@ async function main() {
     return;
   }
 
-  const affiliateLinkTags = Object.keys(parseYamlKeys(AFFILIATE_LINKS_PATH));
+  const affiliateLinks = parseYamlKeys(AFFILIATE_LINKS_PATH);
 
-  const draft = await draftPostWithGemini(freshItems.slice(0, 10), affiliateLinkTags);
+  const draft = await draftPostWithGemini(freshItems.slice(0, 10), affiliateLinks);
   if (!draft) {
     console.log("Gemini did not return a usable draft. Exiting.");
     return;
   }
+
+  ensureBodyHasAffiliateLink(draft, affiliateLinks);
 
   const imagePath = await sourceImage(draft, freshItems);
 
@@ -190,18 +192,27 @@ function markSourceUsed(url, existing) {
 
 function parseYamlKeys(filePath) {
   const raw = fs.readFileSync(filePath, "utf8");
-  const keys = {};
+  const links = {};
+  let currentTag = null;
   for (const line of raw.split("\n")) {
-    const match = line.match(/^([a-z_]+):\s*$/);
-    if (match) keys[match[1]] = true;
+    const tagMatch = line.match(/^([a-z_]+):\s*$/);
+    if (tagMatch) {
+      currentTag = tagMatch[1];
+      links[currentTag] = {};
+      continue;
+    }
+    const fieldMatch = line.match(/^\s+(url|label|use_when):\s*"?([^"]*)"?\s*$/);
+    if (fieldMatch && currentTag) {
+      links[currentTag][fieldMatch[1]] = fieldMatch[2];
+    }
   }
-  return keys;
+  return links;
 }
 
 // ---------- Gemini drafting ----------
 
-async function draftPostWithGemini(items, affiliateLinkTags) {
-  const prompt = buildPrompt(items, affiliateLinkTags);
+async function draftPostWithGemini(items, affiliateLinks) {
+  const prompt = buildPrompt(items, affiliateLinks);
 
   const res = await fetch(
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
@@ -236,10 +247,14 @@ async function draftPostWithGemini(items, affiliateLinkTags) {
   }
 }
 
-function buildPrompt(items, affiliateLinkTags) {
+function buildPrompt(items, affiliateLinks) {
   const itemsList = items
     .map((it, i) => `${i + 1}. ${it.title}\n   URL: ${it.link}\n   Summary: ${it.description || "(none)"}`)
     .join("\n\n");
+
+  const linksList = Object.entries(affiliateLinks)
+    .map(([tag, l]) => `- ${tag}: ${l.url}  (use for: ${l.use_when || tag})`)
+    .join("\n");
 
   return `You are writing for affiliatealfa, an independent blog that covers HighLevel CRM
 updates for marketing agencies. The tone is direct, specific, and useful, never hypey
@@ -254,7 +269,17 @@ owner). Write a full post about it, in your own words, adding real independent v
 a concrete use case, a practical implication, or a comparison, not just a rewording of
 the source.
 
-Available affiliate link tags (pick the single best fit): ${affiliateLinkTags.join(", ")}
+Here are the actual affiliate links available, with the real URL for each (these are
+real tracked referral links, use the exact URL given, never alter or invent one):
+
+${linksList}
+
+Pick the single best-fit tag for this post's topic. This is a MANDATORY requirement:
+somewhere in body_markdown, naturally embed that link at least once (ideally twice) as
+a real markdown link using its exact URL, e.g. "[Explore HighLevel's AI tools](${affiliateLinks.ai ? affiliateLinks.ai.url : "URL_HERE"})".
+The link must read as a natural part of a sentence, never a bare "click here" or a
+link dumped at the end with no context. A post with zero embedded links in
+body_markdown is an incomplete answer - do not submit one.
 
 Respond with ONLY valid JSON, no markdown fences, in this exact shape:
 {
@@ -264,8 +289,23 @@ Respond with ONLY valid JSON, no markdown fences, in this exact shape:
   "affiliate_link_tag": "one of the provided tags",
   "cta_text": "one short sentence for the CTA button context",
   "image_query": "2-4 word search query for a relevant stock photo, no brand names",
-  "body_markdown": "the full post body in markdown, 400-700 words, no title heading (title is separate)"
+  "body_markdown": "the full post body in markdown, 400-700 words, no title heading (title is separate), containing at least one real embedded affiliate link as described above"
 }`;
+}
+
+// Safety net: Gemini is instructed to embed a real affiliate link in the body,
+// but if it doesn't (or uses a malformed one), this guarantees the published
+// post still has at least one real, working, tracked link in it.
+function ensureBodyHasAffiliateLink(draft, affiliateLinks) {
+  const link = affiliateLinks[draft.affiliate_link_tag] || affiliateLinks.default;
+  if (!link || !link.url) return;
+
+  const alreadyHasIt = draft.body_markdown.includes(link.url);
+  if (alreadyHasIt) return;
+
+  console.warn(`Gemini's draft had no embedded affiliate link for tag "${draft.affiliate_link_tag}", appending a fallback.`);
+  const label = link.label || "Learn more";
+  draft.body_markdown += `\n\n[${label}](${link.url})`;
 }
 
 function normalizeDraft(parsed) {

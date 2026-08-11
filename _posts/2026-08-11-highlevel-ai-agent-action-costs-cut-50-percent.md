@@ -23,7 +23,7 @@ With these optimizations, the heaviest agents—specifically multi-tool setups a
 
 ### The Practical Implication for Agency Pricing
 
-For white-label agencies reselling HighLevel, this is a direct margin boost. If you bundle AI workflows into your retainer packages or charge per successful automated interaction, your cost of fulfillment just dropped by half. 
+For white-label agencies reselling HighLevel, this is a direct margin boost. If you bundle AI workflows into your retainer packages or charge per successful automated interaction, your cost of fulfillment just dropped by half. If you haven't yet [explored what HighLevel's AI tools](https://www.gohighlevel.com/ai?fp_ref=affiliatealfa) can actually do across a client account, this pricing shift is a good reason to take a real look now rather than waiting. 
 
 Even better, it lowers the barrier to entry for clients who want custom automations built out. You no longer have to warn local business clients about heavy token usage when setting up complex conversational flows.
 
